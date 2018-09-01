@@ -1,0 +1,190 @@
+---
+title: "LIS 490 HomeWork 6"
+author: "ID: 111"
+date: "Saturday, October 15, 2016"
+output:
+  html_document:
+    highlight: tango
+    toc: yes
+  pdf_document:
+    toc: yes
+  word_document:
+    toc: yes
+---
+We will use the bootstrap technique to generate confidence intervals
+
+# 1. 
+Suppose we have a sample of data from an exponential distribution with parameter lambda. In this case use lambda.hat = 1/mean(X).
+
+As the number of observations increases, does the estimate for lambda become roughly normally distributed? We will answer this question in the following parts.
+
+## 1a. (1) 
+Generate 100 observations of test data, with lambda=3. Remember to set your seed before carrying out any computations.
+```{r}
+set.seed(0)
+test_data <- rexp(100, rate = 3)
+```
+
+## 1b. (1) 
+What is the mean of your test data? (give the code and the value)
+```{r}
+mean(test_data)
+```
+
+## 1c. (1) 
+What is your estimate lambda.hat? (give the code and the value)
+```{r}
+lambda_hat <- 1 / mean(test_data)
+lambda_hat
+```
+
+# 2. 
+Now use the bootstrap to estimate the distribution of lambda.hat and create bootstrap confidence intervals for lambda, rather than the approach in 1).
+
+## 2a. (1) 
+Form a set of bootstrap estimates of our parameter by generating B random samples as you did once in 1a but use lambda.hat since we do not know the true lambda in this case (keep n=100). Set B=1000, and again set your seed.
+```{r}
+set.seed(0)
+B = 1000
+```
+
+## 2b. (1) 
+Get a new estimate for lambda.hat from each of the bootstrap samples in 2a. You'll want to create a matrix to receive each value. You should have 1000 estimates for lambda.hat now.
+```{r}
+lambda_bootstrap <- replicate(B, 1 / mean(rexp(n = 100, lambda_hat)))
+```
+
+## 2c. (2) 
+Now look at the sampling distribution for lambda.hat, using the hist function. Remember the graphing techniques discussed in class and use them to make the plot look professional. Does the distribution look normal?
+```{r}
+hist(
+  lambda_bootstrap,
+  xlab = 'lambda',
+  ylab = 'Frequency',
+  main = 'Bootstrap Estimates of lambda',
+  breaks = 100,
+  xlim = c(2, 4)
+)
+```
+
+**Answer**: Yes. The distribution looks normal. 
+
+## 2d. (1) 
+Calculate an estimate of the standard error of lambda.hat using your collection of bootstrap estimated parameters. What is your 95% confidence interval?
+```{r}
+# Estimate of standard error of lambda
+se_bootstrap <- sd(lambda_bootstrap)
+# 95% confidence interval for bootstrap estimate of lambda
+c(
+  mean(lambda_bootstrap) - 1.96 * se_bootstrap,
+  mean(lambda_bootstrap) + 1.96 * se_bootstrap
+)
+```
+
+## 3a. (5) 
+We made some decisions when we used the bootstrap above that we can now question. Repeat the above creation of a confidence interval for a range of values of data (we had our sample size fixed at 100) and a range of bootstrap values (we had B fixed at 1000). Suppose the sample size varies (100, 200, 300, .... , 1000) and B varies (1000, 2000, ... , 10000). You will likely find it useful to write functions to carry out these calculations. Your final output should be upper and lower pairs for the confidence intervals produced using the bootstrap method for each value of sample size and B.
+
+generalize 2b into a function, and vary inputs of sample size and B as we did above.
+```{r}
+boot.sample <- function(sample.size, B) {
+  #code here
+  
+  # Initialize matrix to store upper and lower confidence intervals
+  confidence_95 <- matrix(rep(-999), nrow = length(sample.size) * length(B), ncol = 4)
+  colnames(confidence_95) <- c('Lower confidence interval','Higher confidence interval','Sample Size','B')
+  # Initialize a counter that indicate the position of current confidence interval in the matrix
+  count <- 1
+  
+  # Simulation
+  if (count < dim(confidence_95)[1]) {
+    for (i in 1:length(sample.size)) {
+      for (j in 1:length(B)) {
+        # Bootstrap estimate of lambda
+        set.seed(0)
+        lambda_bootstrap <-
+        replicate(B[j], 1 / mean(rexp(n = sample.size[i], lambda_hat)))
+        # Estimate of standard error of lambda
+        se_bootstrap <- sd(lambda_bootstrap)
+        # 95% confidence interval for bootstrap estimate of lambda
+        confidence_95_tmp <- c(
+          mean(lambda_bootstrap) - 1.96 * se_bootstrap,
+          mean(lambda_bootstrap) + 1.96 * se_bootstrap
+        )
+        confidence_95[count,] <- c(confidence_95_tmp,sample.size[i],B[j])
+        count = count + 1
+      }
+    }
+  }
+  return(confidence_95)
+}
+```
+
+```{r}
+# Show case
+B <- seq(1000, length = 10, by = 1000)
+sample.size <- seq(100, length = 10, by = 100)
+head(boot.sample(sample.size,B))
+```
+
+## 3b. (2) 
+Plot your CI limits to show the effect of changing the sample size andchanging the number of bootstrap replications. What do you conclude?
+
+```{r, message=FALSE, warning=FALSE}
+simulated_CI <- boot.sample(sample.size,B)
+# For fixed sample size = 100
+library(Hmisc)
+errbar(
+  B,
+  apply(simulated_CI[1:10, 1:2], 1, mean),
+  simulated_CI[1:10, ][, 1],
+  simulated_CI[1:10, ][, 2],
+  xlab = 'Number of Replications',
+  ylab = 'Confidence Limits'
+  )
+title(main = 'Confidence Limits for sample.size = 100 as number of replications varies')
+
+# For fixed number of replications = 1000
+errbar(
+  B,
+  apply(simulated_CI[seq(1, length = 10, by = 10), 1:2], 1, mean),
+  simulated_CI[seq(1, length = 10, by = 10), ][, 1],
+  simulated_CI[seq(1, length = 10, by = 10), ][, 2],
+  xlab = 'Sample Size',
+  ylab = 'Confidence Limits'
+  )
+title(main = 'Confidence Limits for Number of Replications = 100 as sample size varies')
+```
+
+## 4a. (5) 
+In 1961 John Tukey wrote an article called The Future of Data Analysis (it is uploaded in moodle). Some people say it is prophetic regarding the field of Data Science today. Do you agree or disagee? Why or why not? (Please keep your answer less than 500 words).
+
+**Answer**: 
+
+John Tukey does predict the incoming of data science in some ways. When John discuss about how would the new data analysis be initiated, he mentions that people will very likely to have concerns on "more complexly organized data". In traditional statistics, the data is often generalized from experiments or surveys on random sampling, where statisticians can control how organized the data will be by desgining the experiment and the survey. However, John brings out the idea of "more complexly organized data" at that time, which indeed corresponds to one feature of Big Data nowadays: The raw data from the Internet is messy and unorganized.
+
+John also mentions the change of focus in data analysis in his article: "Procedures of diagnosis, and procedures to extract indications rather than conclusions, will have to playa large part in the future of data analyses". In fact, today's data scientist usually spend 80-90% of their time on data mining and preparing the data in certain form for any further data analysis. John also predicts the automation of preliminary analysis, where he says graphs (data visualization nowadays) "will cease to be the vehicle through which  a man diagnoses or seeks indications, becoming, instead, the vehicle through which the man supervises, and approves or disapproves, the diagnoses and indications already found by the machine". Newly rising machine learning techniques basically do the same thing as John has described it in his article.
+
+In addition, John also emphasizes the impact of developing computing power, he claims that the computer, in some situations, can makes unfeasible things feasible. And even for feasible things, computer can also be vital in terms of speed and economy of finding the answer.
+
+
+## 4b. (5) 
+
+Relate the article to the Life Cycle of Data discussion from class. You may wish to choose an example or idea from the article and clearly explore how it relates to the Life Cycle of Data. (Please keep your answer less than 500 words).
+
+**Answer**: 
+
+The way John describes his central interest is very similar to the way the Life Cycle of Data is defined now. "All in all, I have come to feel that my central interest is in data analysis, which I take to include, among other things: procedures for analyzing data, techniques for interpreting the results of such procedures, ways of planning the gathering of data to make its analysis easier, more precise or more accurate, and all the machinery and results of (mathematical) statistics which apply to analyzing data." 
+
+This description includes several parts of Life Cycle of Data: 
+
+1. Data aquisition, data cleaning and data organization:
+
+> ways of planning the gathering of data to make its analysis easier, more precise, or more accurate
+
+2. Data analysis: 
+
+> all the machinery and results of (mathematical) statistics which apply to analyzing data
+
+3. Data reporting
+
+> techniques for interpreting the results of such procedures

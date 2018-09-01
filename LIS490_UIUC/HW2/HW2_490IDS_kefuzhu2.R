@@ -1,0 +1,189 @@
+# HW 2 Due Tuesday Sept 13, 2016. Upload R file to Moodle with name: HW2_490IDS_YOUR_NetID.R
+# Do Not remove any of the comments. These are marked by #
+
+###Name: Kefu Zhu
+
+# In this assignment you will manipulate a data frame, by taking subsets and creating new variables, 
+# with the goal of creating a plot.
+
+# You will work with a dataset called Baseball in the R library. The Baseball dataset describes
+# baseball players' stats from the '86 and '87 season, as well as career stats.
+
+# Before beginning with the housing data however, you will do some warm up 
+# exercises with the small family data set that we have used in class.
+
+#PART 1.  Family Data
+# Load the data from the Web into your R session with the following command:
+load(url("http://courseweb.lis.illinois.edu/~jguo24/family.rda"))
+
+# In the following exercises try to write your code to be as general as possible
+# so that it could still work if the family had 27 members in it or if the 
+# variables were in a different order in the data frame.
+
+# Q1. (2 pts.) 
+# The NHANES survey (the source of the family data) used different cut-off values for 
+# men and women when classifying them as over weight. Suppose that a man is classified 
+# as obese if his bmi exceeds 26 and a woman is classified as obese if her bmi exceeds 25.
+
+# Write a logical expression to create a logical vector, called OW_NHANES, that is TRUE if
+# a member of family is obese and FALSE otherwise
+
+OW_NHANES <- ((fbmi > 26) & (fgender == 'm')) | ((fbmi > 25) & (fgender == 'f'))
+
+# Q2. (4 pts.)
+# Here is an alternative way to create the same vector that introduces 
+# some useful functions and ideas
+
+# We will begin by creating a numeric vector called OW_limit that is 26 for each male in
+# the family and 25 for each female in the family.
+
+# To do this, first create a vector of length 2 called OWval whose first element 
+# is 26 and second element is 25.
+OWval <- c(26,25)
+
+# Create the OW_limit vector by subsetting OWval by position, where the 
+# positions are the numeric values in the gender variable 
+# (i.e. use as.numeric to coerce the factor vector to a numeric vector)
+OW_limit <- OWval[as.numeric(fgender)]
+
+# Finally, us OW_limit and bmi to create the desired logical vector, and
+# call it OW_NHANES2.
+OW_NHANES2 <- fbmi > OW_limit
+
+# Q3. (2 pts.)
+# Use the vector OW_limit and each person's height to find the weight 
+# that they would have if their bmi was right at the limit (26 for men and 
+# 25 for women). Call this weight OW_weight
+
+# To do this, start with the formula:
+# bmi = (weight/2.2) / (2.54/100 * height)^2
+# and find re-express it in terms of weight.
+OW_weight <- 2.2 * OW_limit * (2.54 / 100 * fheight) ^ 2
+
+# Make a plot of the weight at wihich they would
+# be over weight aginst actual weight
+plot(OW_weight ~ fweight, xlab = 'Actual Weight', ylab = 'Expected Weight')
+
+
+#PART 2.  Baseball data
+#Load the data into R.
+#In order to access this data set we will install the relevant package and use the following code to do so:
+install.packages("vcd")
+library(vcd)
+attach(Baseball)
+#This means that the dataset Baseball was in the vcd package.
+
+# Q4.  (4 pts.)
+# How many variables are in the dataset Baseball?
+### Your code below
+length(Baseball)
+### Your answer here
+# Answer: Dataset Baseball has 25 variables
+
+# How many observations are in Baseball?
+### Your code below
+dim(Baseball)[1]
+### Your answer here
+# Answer: Baseball dataset has 322 observations
+
+# For a more DETAILED description of ALL of the variables is this data set, visit:
+# https://vincentarelbundock.github.io/Rdatasets/doc/vcd/Baseball.html
+
+# Run the summary function and anwser the following questions:
+# For the variable team87, which state had the most baseball players in the dataset?
+### Your code below
+summary(team87)
+### Your answer here
+# Answer: NY has the most baseball players
+
+# Make an observation about the variable, sal87, which is the yearly salary of the selected 
+# baseball players in the dataset.
+
+# Who is the highest paid player in the data set?
+### Your code below
+paste(name1[which(sal87 == max(sal87, na.rm = TRUE))], 
+      name2[which(sal87 == max(sal87, na.rm = TRUE))], 
+      sep = ' ')
+### Your answer here
+# Answer: Eddie Murray is the highest paid player
+
+# Q5. (2 pts.)
+# Now, we only want to use the baseball players in the National League. 
+# This information is found through the variable, league86. The letter N indicates that the 
+# player is in the National League. The letter A indicates that the player is in the American League.
+# Subset the new data frame so that all of the baseball players are in the National League,
+# and only keep the following variables: name1, name2, years, hits86, homer86, homeruns,rbi, and sal87.
+# To clarify, the variable, homer86 are the homeruns in that the player hit in '86, and the 
+# variable homeruns are career homeruns for each player.
+# Call the new data Baseball1 (your code below)
+Baseball1 <-
+  subset.data.frame(
+    Baseball,
+    league86 == 'N',
+    select = c(name1, name2, years, hits86, homer86, homeruns, rbi, sal87)
+  )
+
+# Q6. (2 pts.)
+# We want to remove unusually large values in order to further subset the data.
+# Use the quantile function to determine the 99% of variable sal87 (the salaries of the players in '87).
+# Then remove those baseball players that are above the 99th percentile.
+# Call this new dataset Baseball1 as well.
+Baseball1 <-
+  subset.data.frame(Baseball1, 
+                    Baseball1$sal87 <= quantile(sal87, 0.99, na.rm =TRUE))
+
+# Q7. (2 pts.)
+# Create a new vector called hitsperhome.
+# Divide hits86 by homer86, and this will create our new vector.
+# Now add this new variable to the data frame.
+hitsperhome <- Baseball1$hits86 / Baseball1$homer86
+Baseball1$hitsperhome <- hitsperhome
+
+# Q8. (2 pts.)
+# Create a vector called hr15, this will be the number of homeruns hit in the year 1986 
+# (NOT total) so use the variable, homer86, if this number is greater than 15, it is set to 15.
+# So if a player has 15 or more homeruns in that year, then hr15 will be 15, otherwise
+# it will be the actual number of homeruns.
+hr15 <- ifelse(Baseball1$homer86 > 15, 15, Baseball1$homer86)
+hr15
+
+# Q9. (2 pts.)
+# Find out if there is a significant association between homeruns hit in 1986, variable homer86,
+#and the salary of the players on opening day in 1987, variable sal87 (which is USD 1000).
+# Answer this using several functions, including the plot function.
+# Make 3 observations below.
+
+# Method 1: Correlation test
+shapiro.test(Baseball1$homer86)
+shapiro.test(Baseball1$sal87)
+# Since neither of the data is normally distributed based on 0.05 significance level, I decide to use spearman correlation test
+cor.test(Baseball1$homer86,Baseball1$sal87,method = 'spearman')
+# Answer: Based on 0.05 significance level, 
+# the less than 0.05 p-value and positive coefficient in result indicate that 
+# there is a statistically significant positive association between homer86 and sal87.
+
+# Method 2: Linear regression
+fit <- lm(Baseball1$homer86 ~ Baseball1$sal87)
+par(mfrow = c(2,2))
+plot(fit)
+# Since neither the problem of non-normality 
+# nor the problem of heteroscedasticity appears to be significant in the diagnostic plots, 
+# the fitted linear regression is valid.
+summary(fit)
+# Answer: Based on 0.05 significance level, the less than 0.05 p-value and positive coefficient for variable sal87 
+# indicate a statistically significant positive linear relationship between homer86 and sal87.
+
+# Method 3: Scatterplot
+par(mfrow = c(1,1))
+plot(Baseball1$homer86 ~ Baseball1$sal87, 
+xlab = 'Salary of the player on opening day in 1987 (in USD 1000)',
+ylab = 'Number of homerun hits in 1986')
+# Answer: The scatter plot shows a general positive linear trend between homer86 and sal87.
+# For observations with low salary (less than about $250,000) in 1987, their number of homerun hits in 1986 does not seem to be relevant with their salary.
+# But observations that have salary higher than $250,000 in 1987 appear to have higher number of humerun hits in 1986.
+# Therefore, in general, there is a positive association between homer86 and sal87, 
+# but such association is not significant for observations that have sal87 less than 250.
+# To summarize the association between homer86 and sal87:
+#  * Positive association
+#  * Linear relationship
+#  * There is no apparent association between homer86 and sal87 for observations that have sal87 less than 250
