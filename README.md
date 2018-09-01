@@ -1,0 +1,1 @@
+This repository contains various fun stuff about statistics 😏
