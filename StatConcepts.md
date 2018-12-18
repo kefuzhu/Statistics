@@ -14,9 +14,11 @@ $CV = \frac{\sigma}{\mu}$
 	
 - Negatively skewed $\Leftrightarrow$ Left skewed $\Leftrightarrow$ tail on the left side
 - Positively skewed $\Leftrightarrow$ Right skewed $\Leftrightarrow$ tail on the right side
-<center>
-![Skewness](https://github.com/kefuzhu/Statistics/raw/master/graphs/Skewness.png)
-</center>
+
+<p align="center">
+	<img src="https://github.com/kefuzhu/Statistics/raw/master/graphs/Skewness.png">
+</p>
+
 
 **5. Bessel's correction**: use $n-1$ instead of $n$ in the formula for calculation the sample variance and sample standard deviation. Yields larger estimation of sample variance/standard deviation.
 
@@ -26,9 +28,10 @@ $s_n^2 = \frac{\sum_{i=1}^n (x_i-\bar x)^2}{n}\ \ \ \rightarrow s_{n-1}^2 = \fra
 </center>
 
 **6. Type I and Type II error**
-<center>
-![TypeI_TypeII](https://github.com/kefuzhu/Statistics/raw/master/graphs/TypeI_TypeII.png)
-</center>
+
+<p align="center">
+	<img src="https://github.com/kefuzhu/Statistics/raw/master/graphs/TypeI_TypeII.png">
+</p>
 
 **7. Pearson and Spearman correlation**
 
@@ -38,17 +41,18 @@ $s_n^2 = \frac{\sum_{i=1}^n (x_i-\bar x)^2}{n}\ \ \ \rightarrow s_{n-1}^2 = \fra
 **Note**: The Spearman correlation between two variables is equal to the Person correlation between rank values of those two variables
 
 ![correlation](https://github.com/kefuzhu/Statistics/raw/master/graphs/correlation_1.png)![correlation](https://github.com/kefuzhu/Statistics/raw/master/graphs/correlation_3.png)
-<center>
-![correlation](https://github.com/kefuzhu/Statistics/raw/master/graphs/correlation_2.png)
-</center>
+
+<p align="center">
+	<img src="https://github.com/kefuzhu/Statistics/raw/master/graphs/correlation_2.png">
+</p>
 
 **8. Confidence Interval**: 
 
 - **Median**: ($\frac{n}{2} - z^{*}\frac{\sqrt{n}}{2}\ th\ ranked\ value,1 + \frac{n}{2} + z^{*}\frac{\sqrt{n}}{2}\ th\ ranked\ value$)
 
-<center>
-![Skewness](https://github.com/kefuzhu/Statistics/raw/master/graphs/confidence_interval_median.png)
-</center>
+<p align="center">
+	<img src="https://github.com/kefuzhu/Statistics/raw/master/graphs/confidence_interval_median.png">
+</p>
 
 - **Mean**: 
 	- Known variance: ( $\overline{x} - z^{*}\frac{\sigma}{\sqrt{n}},\ \overline{x} + z^{*}\frac{\sigma}{\sqrt{n}}$)
@@ -62,6 +66,7 @@ $MSE = \frac{1}{n} \sum_{i=1}^n (Y_i - \hat{Y_i})^2$
 
 **But extremely small MSE may indicate an overfitting of a model. The MSE will usually drop after certain complexity of a model. Adding more complexity is not desirable. See an example graph for different degree of polynomial regression**
 
-<center>
-![MSE](https://github.com/kefuzhu/Statistics/raw/master/graphs/MSE.png)
-</center>
+<p align="center">
+	<img src="https://github.com/kefuzhu/Statistics/raw/master/graphs/MSE.png">
+</p>
+
